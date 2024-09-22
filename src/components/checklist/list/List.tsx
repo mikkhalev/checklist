@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {Checkbox, IconButton, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
+import {Checkbox, IconButton, ListItemButton, ListItemIcon, ListItemText, Typography} from "@mui/material";
 import * as classes from './list.module.scss'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -14,35 +14,44 @@ interface Task {
 
 interface ListTasks {
     items: Task[],
-    checkItem: (id: number) => void
+    checkItem: (id: number) => void,
+    currentUser: number | null
 }
 
-const List: FC<ListTasks> = ({items, checkItem}) => {
-
+const List: FC<ListTasks> = ({items, checkItem, currentUser}) => {
     return (
         <div className={classes.wrapper}>
             {
-                items.map((task: Task) => (
-                    <ListItemButton disableRipple key={task.id}>
-                        <Checkbox
-                            checked={task.completed}
-                            onChange={() => checkItem(task.id)}
-                        />
-                        <ListItemText primary={task.title + " " + task.id} className={`${classes.title} ${task.completed ? classes.completed : ''}`}/>
+                items.length === 0 ? (
+                    <Typography variant="body1" className={classes.notice}>
+                        {
+                            currentUser !== null ? 'У пользователя задач нет' : 'Выберете пользователя'
+                        }
+                    </Typography>
+                ) : (
+                    items.map((task: Task) => (
+                        <ListItemButton disableRipple key={task.id}>
+                            <Checkbox
+                                checked={task.completed}
+                                onChange={() => checkItem(task.id)}
+                            />
+                            <ListItemText primary={task.title + " " + task.id} className={`${classes.title} ${task.completed ? classes.completed : ''}`}/>
 
-                        <ListItemIcon>
-                            <IconButton>
-                                <ExpandLessIcon />
-                            </IconButton>
-                            <IconButton>
-                                <ExpandMoreIcon />
-                            </IconButton>
-                            <IconButton>
-                                <DragHandleIcon />
-                            </IconButton>
-                        </ListItemIcon>
-                    </ListItemButton>
-                ))
+                            <ListItemIcon>
+                                <IconButton>
+                                    <ExpandLessIcon />
+                                </IconButton>
+                                <IconButton>
+                                    <ExpandMoreIcon />
+                                </IconButton>
+                                <IconButton>
+                                    <DragHandleIcon />
+                                </IconButton>
+                            </ListItemIcon>
+                        </ListItemButton>
+                    ))
+                )
+
             }
         </div>
     );
