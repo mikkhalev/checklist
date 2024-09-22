@@ -1,0 +1,12 @@
+.wrapper {
+  width: 100%;
+  padding: 25px;
+  overflow-y: scroll;
+  .title {
+    padding: 0 10px;
+  }
+  .completed {
+    color: #777777;
+    text-decoration: line-through;
+  }
+}

@@ -1,0 +1,13 @@
+.wrapper {
+  width: 100%;
+  max-width: 800px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  min-height: 240px;
+  max-height: 100vh;
+  margin: auto;
+  border-top: inset #00ff60 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
