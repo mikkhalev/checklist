@@ -26,14 +26,11 @@ const Checklist = () => {
         fetch('https://jsonplaceholder.typicode.com/todos')
             .then((response) => response.json() )
             .then((data: TaskResponse[]) => {
-                const tasks = data.filter((task) => task.userId == currentUser)
-                tasks.sort((a, b) => Number(a.completed) - Number(b.completed))
-                setTasks(tasks);
-                console.log(tasks);
+                data.sort((a, b) => Number(a.completed) - Number(b.completed))
+                setTasks(data);
+                console.log(data);
             })
-    }, [currentUser])
 
-    useEffect(() => {
         fetch('https://jsonplaceholder.typicode.com/users')
             .then((response) => response.json() )
             .then((data: UserResponse[]) => {
@@ -44,14 +41,22 @@ const Checklist = () => {
                 setUsers(users)
                 console.log(users);
             })
-    }, []);
+    }, [])
+
+    const filteredTasks = useMemo(() => {
+        console.log('Повтор фильтрации...')
+        return currentUser === null
+            ? []
+            : tasks.filter(task => task.userId === currentUser).sort((a, b) => Number(a.completed) - Number(b.completed))
+    }, [tasks, currentUser]);
 
     const completed: number = useMemo(() => {
         console.log('Повтор вычислений...')
-        return tasks.filter(task => task.completed).length
-    }, [tasks]);
+        return filteredTasks.filter(task => task.completed).length
+    }, [filteredTasks]);
 
     function checkTask(id: number) {
+
         setTasks(prevTasks =>
             prevTasks.map(task =>
                 task.id === id
@@ -67,13 +72,13 @@ const Checklist = () => {
                 users={users}
                 setCurrentUser={setCurrentUser}/>
             <List
-                items={tasks}
+                items={filteredTasks}
                 checkItem={checkTask}
                 currentUser={currentUser}
             />
             <Footer
                 completed={completed}
-                all={tasks.length}
+                all={filteredTasks.length}
             />
         </div>
     );
