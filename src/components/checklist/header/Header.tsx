@@ -1,6 +1,6 @@
 import React, {FC, ReactNode} from 'react';
 import * as classes from './header.module.scss'
-import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Typography} from "@mui/material";
+import {CircularProgress, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Typography} from "@mui/material";
 
 
 interface User {
@@ -9,10 +9,11 @@ interface User {
 }
 interface HeaderProps {
     users: User[],
-    setCurrentUser: (id: number) => void
+    setCurrentUser: (id: number) => void,
+    isLoading: boolean
 }
 
-const Header: FC<HeaderProps> = ({users, setCurrentUser}) => {
+const Header: FC<HeaderProps> = ({users, setCurrentUser, isLoading}) => {
     return (
         <div className={classes.header}>
             <Typography variant="h5">
@@ -24,13 +25,19 @@ const Header: FC<HeaderProps> = ({users, setCurrentUser}) => {
                     row
                 >
                     {
-                        users.map((user) => (
-                            <FormControlLabel
-                                value={user.username}
-                                control={<Radio />}
-                                label={user.username}
-                                onClick={() => setCurrentUser(user.id)}/>
-                        ))
+                        isLoading ? (
+                            <CircularProgress className={classes.loader}/>
+                            ) : (
+                            users.map((user) => (
+                                <FormControlLabel
+                                    value={user.username}
+                                    control={<Radio />}
+                                    label={user.username}
+                                    onClick={() => setCurrentUser(user.id)}
+                                />
+                            ))
+                        )
+
                     }
                 </RadioGroup>
             </FormControl>

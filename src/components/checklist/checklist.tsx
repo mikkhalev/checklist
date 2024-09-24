@@ -22,6 +22,8 @@ const Checklist = () => {
     const [users, setUsers] = useState<UserResponse[]>([])
     const [currentUser, setCurrentUser] = useState<number | null>(null)
 
+    const [loadingUsers, setLoadingUsers] = useState<boolean>(true)
+
     useEffect(() => {
         fetch('https://jsonplaceholder.typicode.com/todos')
             .then((response) => response.json() )
@@ -41,6 +43,7 @@ const Checklist = () => {
                 setUsers(users)
                 console.log(users);
             })
+            .finally(() => setLoadingUsers(false))
     }, [])
 
     const filteredTasks = useMemo(() => {
@@ -56,7 +59,6 @@ const Checklist = () => {
     }, [filteredTasks]);
 
     function checkTask(id: number) {
-
         setTasks(prevTasks =>
             prevTasks.map(task =>
                 task.id === id
@@ -70,7 +72,9 @@ const Checklist = () => {
         <div className={`wrapper ${classes.wrapper}`}>
             <Header
                 users={users}
-                setCurrentUser={setCurrentUser}/>
+                setCurrentUser={setCurrentUser}
+                isLoading={loadingUsers}
+            />
             <List
                 items={filteredTasks}
                 checkItem={checkTask}
