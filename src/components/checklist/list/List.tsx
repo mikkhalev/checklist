@@ -16,9 +16,14 @@ interface ListTasks {
     items: Task[],
     checkItem: (id: number) => void,
     currentUser: number | null
+    moveTask: (id: number, direction: string) => void
 }
 
-const List: FC<ListTasks> = ({items, checkItem, currentUser}) => {
+const List: FC<ListTasks> = ({items, checkItem, currentUser, moveTask}) => {
+    let lastIndexActive = 0;
+    if (items.length !== 0) {
+        lastIndexActive = items.length - 1 - items.slice().reverse().findIndex(task => !task.completed)
+    }
     return (
         <div className={classes.wrapper}>
             {
@@ -29,25 +34,37 @@ const List: FC<ListTasks> = ({items, checkItem, currentUser}) => {
                         }
                     </Typography>
                 ) : (
-                    items.map((task: Task) => (
+                    items.map((task: Task, index) => (
                         <ListItemButton disableRipple key={task.id}>
                             <Checkbox
                                 checked={task.completed}
                                 onChange={() => checkItem(task.id)}
                             />
                             <ListItemText primary={task.title + " " + task.id} className={`${classes.title} ${task.completed ? classes.completed : ''}`}/>
+                            {
+                                task.completed ? null : (
+                                    <ListItemIcon>
+                                        <IconButton
+                                            disabled={index == 0}
+                                            onClick={() => moveTask(task.id, 'up')}
+                                        >
+                                            <ExpandLessIcon />
+                                        </IconButton>
 
-                            <ListItemIcon>
-                                <IconButton>
-                                    <ExpandLessIcon />
-                                </IconButton>
-                                <IconButton>
-                                    <ExpandMoreIcon />
-                                </IconButton>
-                                <IconButton>
-                                    <DragHandleIcon />
-                                </IconButton>
-                            </ListItemIcon>
+                                        <IconButton
+                                            disabled={index == lastIndexActive}
+                                            onClick={() => moveTask(task.id, 'down')}
+                                        >
+                                            <ExpandMoreIcon />
+                                        </IconButton>
+
+                                        <IconButton>
+                                            <DragHandleIcon />
+                                        </IconButton>
+                                    </ListItemIcon>
+                                )
+                            }
+
                         </ListItemButton>
                     ))
                 )

@@ -34,6 +34,7 @@ const Header: FC<HeaderProps> = ({users, setCurrentUser, isLoading}) => {
                                     control={<Radio />}
                                     label={user.username}
                                     onClick={() => setCurrentUser(user.id)}
+                                    key={user.id}
                                 />
                             ))
                         )

@@ -47,18 +47,19 @@ const Checklist = () => {
     }, [])
 
     const filteredTasks = useMemo(() => {
-        console.log('Повтор фильтрации...')
+        console.log('Повтор фильтрации тасок...')
         return currentUser === null
             ? []
             : tasks.filter(task => task.userId === currentUser).sort((a, b) => Number(a.completed) - Number(b.completed))
     }, [tasks, currentUser]);
 
     const completed: number = useMemo(() => {
-        console.log('Повтор вычислений...')
+        console.log('Повтор вычислений кол-ва выполненых тасок...')
         return filteredTasks.filter(task => task.completed).length
     }, [filteredTasks]);
 
     function checkTask(id: number) {
+        console.log('Изменяем таску...')
         setTasks(prevTasks =>
             prevTasks.map(task =>
                 task.id === id
@@ -66,6 +67,24 @@ const Checklist = () => {
                     : task
             )
         );
+    }
+
+    function moveTask(id: number, direction: string) {
+        const currentIndex = tasks.findIndex(task => id == task.id)
+        const directionIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+        const currentTask = tasks.find(task => id == task.id)
+
+        console.log(id, direction, currentIndex)
+
+        const updatedTasks = [...tasks];
+
+        if (currentTask) {
+            updatedTasks.splice(currentIndex, 1)
+            updatedTasks.splice(directionIndex, 0, currentTask)
+            console.log('Перемещаем таску...')
+        }
+
+        setTasks(updatedTasks)
     }
 
     return (
@@ -78,6 +97,7 @@ const Checklist = () => {
             <List
                 items={filteredTasks}
                 checkItem={checkTask}
+                moveTask={moveTask}
                 currentUser={currentUser}
             />
             <Footer
