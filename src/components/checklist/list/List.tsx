@@ -1,72 +1,52 @@
 import React, {FC} from 'react';
-import {Checkbox, IconButton, ListItemButton, ListItemIcon, ListItemText, Typography} from "@mui/material";
+import {Typography} from "@mui/material";
 import * as classes from './list.module.scss'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import DragHandleIcon from '@mui/icons-material/DragHandle';
-
+import ListItem from "../list-item/List-item";
+import {AnimatePresence, motion} from 'framer-motion';
 interface Task {
     userId: number,
     id: number,
     title: string,
-    completed: boolean
+    completed: boolean,
+    order: number
 }
 
 interface ListTasks {
-    items: Task[],
-    checkItem: (id: number) => void,
+    tasks: Task[],
+    checkItem: (task: Task) => void,
     currentUser: number | null
-    moveTask: (id: number, direction: string) => void
+    moveTask: (taskId: number, direction: string, otherTaskId: number | null) => void
+    completedTasksCount: number
 }
 
-const List: FC<ListTasks> = ({items, checkItem, currentUser, moveTask}) => {
-    let lastIndexActive = 0;
-    if (items.length !== 0) {
-        lastIndexActive = items.length - 1 - items.slice().reverse().findIndex(task => !task.completed)
-    }
+const List: FC<ListTasks> = ({tasks, checkItem, currentUser, moveTask, completedTasksCount}) => {
     return (
         <div className={classes.wrapper}>
             {
-                items.length === 0 ? (
+                tasks.length === 0 ? (
                     <Typography variant="body1" className={classes.notice}>
                         {
-                            currentUser !== null ? 'У пользователя задач нет' : 'Выберете пользователя'
+                            currentUser !== null
+                                ? 'У пользователя задач нет'
+                                : 'Выберете пользователя'
                         }
                     </Typography>
                 ) : (
-                    items.map((task: Task, index) => (
-                        <ListItemButton disableRipple key={task.id}>
-                            <Checkbox
-                                checked={task.completed}
-                                onChange={() => checkItem(task.id)}
+                    tasks
+                        .sort((a, b) => a.order - b.order)
+                        .sort((a,b) => Number(a.completed) - Number(b.completed))
+                        .map((task: Task, index) => (
+                            <ListItem
+                                key={`${task.id}-${index}`}
+                                task={task}
+                                index={index}
+                                checkItem={checkItem}
+                                moveTask={moveTask}
+                                unCompletedTasksCount={tasks.length - completedTasksCount}
+                                prevTaskId={index > 0 ? tasks[index - 1].id : null}
+                                nextTaskId={index < tasks.length - 1 ? tasks[index + 1].id : null}
                             />
-                            <ListItemText primary={task.title + " " + task.id} className={`${classes.title} ${task.completed ? classes.completed : ''}`}/>
-                            {
-                                task.completed ? null : (
-                                    <ListItemIcon>
-                                        <IconButton
-                                            disabled={index == 0}
-                                            onClick={() => moveTask(task.id, 'up')}
-                                        >
-                                            <ExpandLessIcon />
-                                        </IconButton>
-
-                                        <IconButton
-                                            disabled={index == lastIndexActive}
-                                            onClick={() => moveTask(task.id, 'down')}
-                                        >
-                                            <ExpandMoreIcon />
-                                        </IconButton>
-
-                                        <IconButton>
-                                            <DragHandleIcon />
-                                        </IconButton>
-                                    </ListItemIcon>
-                                )
-                            }
-
-                        </ListItemButton>
-                    ))
+                        ))
                 )
 
             }

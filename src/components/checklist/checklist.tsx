@@ -7,18 +7,20 @@ import List from "./list/List";
 
 const Checklist = () => {
 
-    interface TaskResponse {
+    interface Task {
         userId: number,
         id: number,
         title: string,
-        completed: boolean
+        completed: boolean,
+        order: number
     }
     interface UserResponse {
         id: number,
         username: string
     }
 
-    const [tasks, setTasks] = useState<TaskResponse[]>([])
+    const [allTasks, setAllTasks] = useState<Task[]>([])
+
     const [users, setUsers] = useState<UserResponse[]>([])
     const [currentUser, setCurrentUser] = useState<number | null>(null)
 
@@ -26,12 +28,16 @@ const Checklist = () => {
 
     useEffect(() => {
         fetch('https://jsonplaceholder.typicode.com/todos')
-            .then((response) => response.json() )
-            .then((data: TaskResponse[]) => {
-                data.sort((a, b) => Number(a.completed) - Number(b.completed))
-                setTasks(data);
-                console.log(data);
+            .then((response) => response.json())
+            .then((data: Task[]) => {
+                const tasksWithOrder = data.map((task, index) => ({
+                    ...task,
+                    order: index + 1,
+                }));
+                console.log(tasksWithOrder)
+                setAllTasks(tasksWithOrder)
             })
+            .catch((error) => console.error('Error fetching tasks:', error));
 
         fetch('https://jsonplaceholder.typicode.com/users')
             .then((response) => response.json() )
@@ -46,45 +52,44 @@ const Checklist = () => {
             .finally(() => setLoadingUsers(false))
     }, [])
 
-    const filteredTasks = useMemo(() => {
-        console.log('Повтор фильтрации тасок...')
-        return currentUser === null
+    let filteredTasks = useMemo(() => {
+        console.log(allTasks)
+        return currentUser == null
             ? []
-            : tasks.filter(task => task.userId === currentUser).sort((a, b) => Number(a.completed) - Number(b.completed))
-    }, [tasks, currentUser]);
+            : allTasks.filter((task) => task.userId == currentUser)
+    }, [currentUser, allTasks])
 
-    const completed: number = useMemo(() => {
-        console.log('Повтор вычислений кол-ва выполненых тасок...')
-        return filteredTasks.filter(task => task.completed).length
-    }, [filteredTasks]);
+    let completedCount = useMemo(() => {
+        return filteredTasks.filter((task) => task.completed).length
+    }, [filteredTasks])
 
-    function checkTask(id: number) {
+    function checkTask(currentTask: Task) {
         console.log('Изменяем таску...')
-        setTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === id
-                    ? { ...task, completed: !task.completed }
-                    : task
-            )
-        );
+        const updatedTasks = allTasks.map((task) =>
+            task.id === currentTask.id
+                ? {...task, completed: !task.completed}
+                : task
+        )
+        setAllTasks(updatedTasks)
     }
 
-    function moveTask(id: number, direction: string) {
-        const currentIndex = tasks.findIndex(task => id == task.id)
-        const directionIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-        const currentTask = tasks.find(task => id == task.id)
+    function moveTask(taskId: number, direction: string, otherTaskId: number | null) {
+        console.log("Перемещаем таску...");
+        const currentTaskIndex = allTasks.findIndex(task => task.id === taskId);
+        const otherTaskIndex = allTasks.findIndex(task => task.id === otherTaskId);
 
-        console.log(id, direction, currentIndex)
-
-        const updatedTasks = [...tasks];
-
-        if (currentTask) {
-            updatedTasks.splice(currentIndex, 1)
-            updatedTasks.splice(directionIndex, 0, currentTask)
-            console.log('Перемещаем таску...')
+        if (currentTaskIndex === -1 || otherTaskIndex === -1) {
+            console.error("One of the tasks is not found");
+            return;
         }
 
-        setTasks(updatedTasks)
+        const updatedTasks = [...allTasks];
+
+        const tempOrder = updatedTasks[currentTaskIndex].order;
+        updatedTasks[currentTaskIndex].order = updatedTasks[otherTaskIndex].order;
+        updatedTasks[otherTaskIndex].order = tempOrder;
+
+        setAllTasks(updatedTasks);
     }
 
     return (
@@ -95,14 +100,15 @@ const Checklist = () => {
                 isLoading={loadingUsers}
             />
             <List
-                items={filteredTasks}
+                tasks={filteredTasks}
                 checkItem={checkTask}
                 moveTask={moveTask}
                 currentUser={currentUser}
+                completedTasksCount={completedCount}
             />
             <Footer
-                completed={completed}
-                all={filteredTasks.length}
+                completedTasksCount={completedCount}
+                allTasksCount={filteredTasks.length}
             />
         </div>
     );

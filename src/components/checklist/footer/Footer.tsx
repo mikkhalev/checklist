@@ -4,14 +4,14 @@ import {Button, Typography} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
 interface FooterProps {
-    completed: number,
-    all: number
+    completedTasksCount: number,
+    allTasksCount: number
 }
-const Footer: FC<FooterProps> = ({completed, all}) => {
+const Footer: FC<FooterProps> = ({completedTasksCount, allTasksCount}) => {
     return (
         <div className={classes.footer}>
             <Typography variant="body2">
-                Completed {completed} of {all}
+                Completed {completedTasksCount} of {allTasksCount}
             </Typography>
             <Button
                 startIcon={<AddIcon />}
