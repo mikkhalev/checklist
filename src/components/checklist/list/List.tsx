@@ -2,7 +2,6 @@ import React, {FC} from 'react';
 import {Typography} from "@mui/material";
 import * as classes from './list.module.scss'
 import ListItem from "../list-item/List-item";
-import {AnimatePresence, motion} from 'framer-motion';
 interface Task {
     userId: number,
     id: number,
@@ -48,7 +47,6 @@ const List: FC<ListTasks> = ({tasks, checkItem, currentUser, moveTask, completed
                             />
                         ))
                 )
-
             }
         </div>
     );

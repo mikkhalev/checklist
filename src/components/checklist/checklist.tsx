@@ -92,6 +92,24 @@ const Checklist = () => {
         setAllTasks(updatedTasks);
     }
 
+    function addTask(titleTask: string) {
+        console.log(titleTask)
+        let updatedTasks = [...allTasks].map((task) => {
+            return {...task, order: task.order + 1}
+        })
+        if (!currentUser) {
+            return
+        }
+        updatedTasks.unshift({
+            userId: currentUser,
+            id: 0,
+            title: titleTask,
+            completed: false,
+            order: 1
+        })
+        setAllTasks(updatedTasks)
+    }
+
     return (
         <div className={`wrapper ${classes.wrapper}`}>
             <Header
@@ -109,6 +127,8 @@ const Checklist = () => {
             <Footer
                 completedTasksCount={completedCount}
                 allTasksCount={filteredTasks.length}
+                currentUser={users.find(user => user.id === currentUser)}
+                addTask={addTask}
             />
         </div>
     );
